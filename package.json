@@ -1,0 +1,32 @@
+{
+  "name": "tg-sergo-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cross-env NODE_ENV=production node ./server.js",
+    "start:dev": "cross-env NODE_ENV=development nodemon ./server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirotovAlexander/tg-Sergo-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SirotovAlexander/tg-Sergo-bot/issues"
+  },
+  "homepage": "https://github.com/SirotovAlexander/tg-Sergo-bot#readme",
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.4",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0"
+  }
+}
