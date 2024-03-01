@@ -1,5 +1,6 @@
 const { Telegraf, Markup } = require("telegraf");
 const { message } = require("telegraf/filters");
+const getWether = require("./api/weatherApi");
 const { BOT_TOKEN } = process.env;
 
 const bot = new Telegraf(BOT_TOKEN);
@@ -54,6 +55,11 @@ bot.start((ctx) =>
     ]).resize()
   )
 );
+
+bot.hears("⭐️ Погода в Chișinău", async (ctx) => {
+  const response = await getWether();
+  ctx.replyWithHTML(`<b>${response}</b>`);
+});
 
 bot.hears("⭐️ Шутки за 300", (ctx) =>
   ctx.reply("Отсаси у тракториста ХАХАХАХАХАХАХАХАХАХАХ")
