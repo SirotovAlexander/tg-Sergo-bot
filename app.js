@@ -2,6 +2,8 @@ const { Telegraf, Markup } = require("telegraf");
 const { message } = require("telegraf/filters");
 const getWether = require("./api/weatherApi");
 const getCurrency = require("./api/currencyApi");
+const getJoke = require("./api/jokeApi");
+const arrOfPlaces = require("./utils/famousPlaces");
 const { BOT_TOKEN, CAPITAL_INFO, INTERESTING_FACTS } = process.env;
 
 const bot = new Telegraf(BOT_TOKEN);
@@ -67,104 +69,17 @@ bot.hears("⭐️ Информация о Chișinău", (ctx) => {
   );
 });
 bot.hears("⭐️ Достопримечательности Chișinău", (ctx) => {
-  // ctx.reply(
-  //   "Единственная достопримечательность в Молдове - это граница с Одесской областью Сережа.\n Хотя если серьезно, то в Chișinău можно посмотреть на: https://turistigid.com/dostoprimechatelnosti/kishinev.html"
-  // );
-
-  ctx.replyWithMediaGroup([
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/park-imeni-shtefana.jpg",
+  for (let i = 0; i < arrOfPlaces.length; i++) {
+    ctx.replyWithMediaGroup([
+      {
+        media: {
+          url: `${arrOfPlaces[i].media.url}`,
+        },
+        caption: `${arrOfPlaces[i].caption}`,
+        type: "photo",
       },
-      caption: "Парк имени Штефана",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/vinnye-pogreba.jpg",
-      },
-      caption: "Винодельческий центр «Малые Милешты»",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/dendrariy.jpg",
-      },
-      caption: "Дендрарий",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/memorialnyy-kompleks.jpg",
-      },
-      caption: "Мемориальный комплекс «Eternitate»",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/sobor-rozhdestva-hristova.jpg",
-      },
-      caption: "Собор Рождества Христова",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/sobor-rozhdestva-hristova.jpg",
-      },
-      caption: "Музей этнографии и естественной истории Молдовы",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/triumfalnaya-arka.jpg",
-      },
-      caption: "Арка Триумфа",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/muzey-arheologii-i-istorii.jpg",
-      },
-      caption: "Национальный музей археологии и истории",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/park-dolina-melnits.jpg",
-      },
-      caption: "Парк развлечений «Долина Мельниц»",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/pamyatnik-shtefanu-velikomu.jpg",
-      },
-      caption: "Памятник государю Штефану Великому",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/chuflinskiy-monastyr.jpg",
-      },
-      caption: "Чуфлинский монастырь",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/muzey-istorii-goroda.jpg",
-      },
-      caption: "Музей истории города",
-      type: "photo",
-    },
-    {
-      media: {
-        url: "https://turistigid.com/wp-content/uploads/2019/10/krepost-soroka.jpg",
-      },
-      caption: "Крепость Сорока",
-      type: "photo",
-    },
-  ]);
-  
+    ]);
+  }
 });
 bot.hears("⭐️ Курс валют по ЕЦБ", async (ctx) => {
   const response = await getCurrency();
@@ -177,6 +92,11 @@ bot.hears("⭐️ Курс валют по ЕЦБ", async (ctx) => {
 bot.hears("⭐️ Шутки за 300", (ctx) =>
   ctx.reply("Отсаси у тракториста ХАХАХАХАХАХАХАХАХАХАХ")
 );
+bot.hears("⭐️ Анектоды по ChișinăuСКИ", async (ctx) => {
+  const response = await getJoke();
+
+  ctx.replyWithHTML(`<b>${response.joke}</b>`);
+});
 
 bot.hears("❌ Закрыть меню", (ctx) =>
   ctx.reply("Пака", Markup.removeKeyboard())
