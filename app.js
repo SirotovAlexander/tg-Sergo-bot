@@ -1,5 +1,11 @@
-const { Telegraf, Markup } = require("telegraf");
-const WizardScene = require("telegraf/scenes/wizard");
+const {
+  Telegraf,
+  Markup,
+  Stage,
+  session,
+  Scenes,
+  Composer,
+} = require("telegraf");
 const { message } = require("telegraf/filters");
 const getWether = require("./api/weatherApi");
 const getCurrency = require("./api/currencyApi");
@@ -9,6 +15,34 @@ const textObj = require("./api/text");
 const { BOT_TOKEN } = process.env;
 
 const bot = new Telegraf(BOT_TOKEN);
+
+const startWizard = new Composer();
+startWizard.on("text", async (ctx) => {
+  await ctx.reply("Назови имя");
+  return ctx.wizard.next();
+});
+
+const firstName = new Composer();
+firstName.on("text", async (ctx) => {
+  await ctx.reply("Назови afvbkb.");
+  return ctx.wizard.next();
+});
+const lastScene = new Composer();
+lastScene.on("text", async (ctx) => {
+  await ctx.reply("Пока");
+  return ctx.scene.leave();
+});
+
+const someScene = new Scenes.WizardScene(
+  "sceneWizard",
+  startWizard,
+  firstName,
+  lastScene
+);
+
+const stage = new Scenes.Stage([someScene]);
+bot.use(session());
+bot.use(stage.middleware());
 
 bot.start((ctx) =>
   ctx.reply(
@@ -22,38 +56,6 @@ bot.start((ctx) =>
       ["❌ Закрыть меню"],
     ]).resize()
   )
-);
-
-const calcScene = new WizardScene(
-  "calc",
-  async (ctx) => {
-    try {
-      await ctx.replyWithHTML(`Введите первое число`);
-      return ctx.wizard.next();
-    } catch {}
-  },
-  async (ctx) => {
-    try {
-      const a = +ctx.message.text;
-      if (isNaN(a)) return;
-      ctx.session.a = a;
-
-      await ctx.replyWithHTML(`Введите второе число`);
-      return ctx.wizard.next();
-    } catch {}
-  },
-  async (ctx) => {
-    try {
-      const b = +ctx.message.text;
-      if (isNaN(b)) return;
-
-      const { a } = ctx.session;
-      const res = a + b;
-
-      await ctx.replyWithHTML(`Результат: ${a} + ${b} = ${res}`);
-      return ctx.scene.leave();
-    } catch {}
-  }
 );
 
 bot.hears("⭐️ Погода в Chișinău", async (ctx) => {
@@ -114,21 +116,51 @@ bot.hears("⭐️ НЕ НАЖИМАЙ", async (ctx) => {
   );
 });
 
-bot.hears("⭐️ Спроси у ЖПТ", async (ctx) => {
-  try {
-    await ctx.scene.enter("calc");
-  } catch (e) {
-    console.error("cant enter calc scene", e);
-  }
-});
+bot.hears("⭐️ Спроси у ЖПТ", (ctx) => ctx.scene.enter("sceneWizard"));
 
 bot.hears("💲 Пожертвования", (ctx) =>
   ctx.reply(
     "Сережа, я понимаю что ты занятой человек и на челядь не привык обращать внимание. Но мы, команда из 25 разработчиков в лице одного человека не против твоих скромных барышей или денежных единиц твоих друзей скамеров в знак благодарности BTC - 1Lfuwsd65dL4nvE5fPaxR7Jei2wDk8TEHE"
   )
 );
+
 bot.hears("❌ Закрыть меню", (ctx) =>
   ctx.reply("Пака", Markup.removeKeyboard())
 );
 
 bot.launch();
+
+// const { Composer, Markup, Scenes, session, Telegraf } = require("telegraf");
+
+// const { BOT_TOKEN } = process.env;
+
+// const startWizard = new Composer();
+// startWizard.on("text", async (ctx) => {
+//   await ctx.reply("Назови имя");
+//   return ctx.wizard.next();
+// });
+
+// const firstName = new Composer();
+// firstName.on("text", async (ctx) => {
+//   await ctx.reply("Назови afvbkb.");
+//   return ctx.wizard.next();
+// });
+// const lastScene = new Composer();
+// lastScene.on("text", async (ctx) => {
+//   await ctx.reply("Пока");
+//   return ctx.scene.leave();
+// });
+
+// const someScene = new Scenes.WizardScene(
+//   "sceneWizard",
+//   startWizard,
+//   firstName,
+//   lastScene
+// );
+// const bot = new Telegraf(BOT_TOKEN);
+// const stage = new Scenes.Stage([someScene]);
+// bot.use(session());
+// bot.use(stage.middleware());
+// bot.command("start", (ctx) => ctx.scene.enter("sceneWizard"));
+
+// bot.launch();
