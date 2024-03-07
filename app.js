@@ -24,12 +24,16 @@ startWizard.on("text", async (ctx) => {
 
 const firstName = new Composer();
 firstName.on("text", async (ctx) => {
-  await ctx.reply("Назови afvbkb.");
+  ctx.wizard.state.name = ctx.message.text;
+  await ctx.reply("Назови фамилию");
   return ctx.wizard.next();
 });
 const lastScene = new Composer();
 lastScene.on("text", async (ctx) => {
-  await ctx.reply("Пока");
+  ctx.wizard.state.secondName = ctx.message.text;
+  await ctx.reply(
+    `${ctx.wizard.state.name} === ${ctx.wizard.state.secondName}`
+  );
   return ctx.scene.leave();
 });
 
