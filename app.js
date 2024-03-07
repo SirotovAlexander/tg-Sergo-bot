@@ -1,10 +1,12 @@
 const { Telegraf, Markup } = require("telegraf");
+const WizardScene = require("telegraf/scenes/wizard");
 const { message } = require("telegraf/filters");
 const getWether = require("./api/weatherApi");
 const getCurrency = require("./api/currencyApi");
 const getJoke = require("./api/jokeApi");
 const arrOfPlaces = require("./utils/famousPlaces");
-const { BOT_TOKEN, CAPITAL_INFO, INTERESTING_FACTS } = process.env;
+const textObj = require("./api/text");
+const { BOT_TOKEN } = process.env;
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -16,10 +18,42 @@ bot.start((ctx) =>
       ["⭐️ Достопримечательности Chișinău", "⭐️ Курс валют по ЕЦБ"],
       ["⭐️ Шутки за 300", "⭐️ Анектоды по ChișinăuСКИ"],
       ["⭐️ Литература о Chișinău анд Молдова", "⭐️ НЕ НАЖИМАЙ"],
-      ["💲 Пожертвования"],
+      ["⭐️ Спроси у ЖПТ", "💲 Пожертвования"],
       ["❌ Закрыть меню"],
     ]).resize()
   )
+);
+
+const calcScene = new WizardScene(
+  "calc",
+  async (ctx) => {
+    try {
+      await ctx.replyWithHTML(`Введите первое число`);
+      return ctx.wizard.next();
+    } catch {}
+  },
+  async (ctx) => {
+    try {
+      const a = +ctx.message.text;
+      if (isNaN(a)) return;
+      ctx.session.a = a;
+
+      await ctx.replyWithHTML(`Введите второе число`);
+      return ctx.wizard.next();
+    } catch {}
+  },
+  async (ctx) => {
+    try {
+      const b = +ctx.message.text;
+      if (isNaN(b)) return;
+
+      const { a } = ctx.session;
+      const res = a + b;
+
+      await ctx.replyWithHTML(`Результат: ${a} + ${b} = ${res}`);
+      return ctx.scene.leave();
+    } catch {}
+  }
 );
 
 bot.hears("⭐️ Погода в Chișinău", async (ctx) => {
@@ -28,7 +62,7 @@ bot.hears("⭐️ Погода в Chișinău", async (ctx) => {
 });
 bot.hears("⭐️ Информация о Chișinău", (ctx) => {
   ctx.replyWithHTML(
-    `<b>${CAPITAL_INFO}\n=========>Цікавеньки факти:${INTERESTING_FACTS}</b>`
+    `<b>${textObj.CAPITAL_INFO}\n=========>Цікавеньки факти:${textObj.INTERESTING_FACTS}</b>`
   );
 });
 bot.hears("⭐️ Достопримечательности Chișinău", (ctx) => {
@@ -78,6 +112,14 @@ bot.hears("⭐️ НЕ НАЖИМАЙ", async (ctx) => {
         "Я знаю твои грязніе тайні сережа=) Видео как нормалные пацаны резвятся: https://rt.pornhub.com/gayporn",
     }
   );
+});
+
+bot.hears("⭐️ Спроси у ЖПТ", async (ctx) => {
+  try {
+    await ctx.scene.enter("calc");
+  } catch (e) {
+    console.error("cant enter calc scene", e);
+  }
 });
 
 bot.hears("💲 Пожертвования", (ctx) =>
